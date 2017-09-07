@@ -1,5 +1,5 @@
 class CustomersController < ApplicationController
-  before_action :set_customer, only: [:show, :edit, :update, :destroy]
+  before_action :set_customer, only: [:show, :edit, :update, :destroy, :generate_ephemeral_key]
 
   # GET /customers
   # GET /customers.json
@@ -24,7 +24,17 @@ class CustomersController < ApplicationController
   # POST /customers
   # POST /customers.json
   def create
-    @customer = Customer.new(customer_params)
+    @customer = Customer.new
+    @stripe_customer = Stripe::Customer.create(
+      description: "created from Rails app",
+      source: {
+        object: "card",
+        number: customer_params[:cc_num],
+        exp_month: customer_params[:cc_exp_mo],
+        exp_year: customer_params[:cc_exp_yr],
+      }
+    )
+    @customer.stripe_id = @stripe_customer.id
 
     respond_to do |format|
       if @customer.save
@@ -61,6 +71,16 @@ class CustomersController < ApplicationController
     end
   end
 
+  def generate_ephemeral_key
+    stripe_version = params['api_version']
+    customer_id = @customer.stripe_id
+    key = Stripe::EphemeralKey.create(
+      {customer: customer_id},
+      {stripe_version: stripe_version}
+    )
+    render json: key.to_json
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_customer
@@ -69,6 +89,6 @@ class CustomersController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def customer_params
-      params.require(:customer).permit(:stripe_id)
+      params.require(:customer).permit(:cc_num, :cc_exp_mo, :cc_exp_yr)
     end
 end
