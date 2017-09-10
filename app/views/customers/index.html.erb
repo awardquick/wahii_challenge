@@ -5,7 +5,10 @@
 <table>
   <thead>
     <tr>
-      <th>Stripe</th>
+      <th>Customer Name</th>
+      <th>Customer Email</th>
+      <th>Customer ID on Stripe</th>
+      <th>Last 4 of Credit Card</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -13,7 +16,10 @@
   <tbody>
     <% @customers.each do |customer| %>
       <tr>
+        <td><%= customer.on_stripe.sources.data.first.name %></td>
+        <td><%= customer.on_stripe.email %></td>
         <td><%= customer.stripe_id %></td>
+        <td><%= customer.on_stripe.sources.data.first.last4 %></td>
         <td><%= link_to 'Show', customer %></td>
         <td><%= link_to 'Edit', edit_customer_path(customer) %></td>
         <td><%= link_to 'Destroy', customer, method: :delete, data: { confirm: 'Are you sure?' } %></td>

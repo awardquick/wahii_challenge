@@ -27,10 +27,12 @@ class CustomersController < ApplicationController
     @customer = Customer.new
     @stripe_customer = Stripe::Customer.create(
       description: "created from Rails app",
+      email: customer_params[:email],
       source: {
         object: "card",
         number: customer_params[:cc_num],
         exp_month: customer_params[:cc_exp_mo],
+        name: customer_params[:cc_name],
         exp_year: customer_params[:cc_exp_yr],
       }
     )
@@ -89,6 +91,6 @@ class CustomersController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def customer_params
-      params.require(:customer).permit(:cc_num, :cc_exp_mo, :cc_exp_yr)
+      params.require(:customer).permit(:cc_num, :cc_exp_mo, :cc_exp_yr, :name, :email)
     end
 end
